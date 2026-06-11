@@ -5,13 +5,12 @@ import os
 from app.auth.utils import get_current_user
 from app.database.models import User
 
-router = APIRouter(prefix="/speech", tags=["speech"])
+router = APIRouter(prefix="/speech", tags=["speech"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/transcribe")
 async def transcribe_audio(
     audio: UploadFile = File(...),
-    user: User = Depends(get_current_user),
 ):
     if not audio.filename:
         raise HTTPException(status_code=400, detail="No audio file provided")

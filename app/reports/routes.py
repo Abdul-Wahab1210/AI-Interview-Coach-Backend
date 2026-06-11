@@ -6,7 +6,7 @@ from app.database.models import InterviewSession, User
 from app.auth.utils import get_current_user
 from app.reports.report_generator import generate_report, get_progress
 
-router = APIRouter(prefix="/reports", tags=["reports"])
+router = APIRouter(prefix="/reports", tags=["reports"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/{session_id}")

@@ -18,24 +18,55 @@ def start_session(
     user_id: int,
     role: str,
     difficulty: str,
+    strictness: str = "moderate",
     num_questions: int = 5,
 ) -> InterviewSession:
     session = InterviewSession(
         user_id=user_id,
         role=role,
         difficulty=difficulty,
+        strictness=strictness,
         status=SessionStatus.IN_PROGRESS.value,
     )
     db.add(session)
     db.flush()
 
-    questions = get_questions_for_role(role, difficulty)
-    selected = questions[:num_questions]
+    static_questions = get_questions_for_role(role, difficulty)
+    selected = static_questions[:num_questions]
+    previous_topics = []
 
     for text in selected:
         q = InterviewQuestion(
             session_id=session.id,
             question_text=text,
+            topic=role,
+            difficulty=difficulty,
+        )
+        db.add(q)
+
+    while len(selected) < num_questions:
+        try:
+            generated = generate_question(role, difficulty, previous_topics)
+            q_text = generated.get("question", "")
+            q_topic = generated.get("topic", role)
+            if not q_text or q_text in selected:
+                break
+            selected.append(q_text)
+            previous_topics.append(q_topic)
+            q = InterviewQuestion(
+                session_id=session.id,
+                question_text=q_text,
+                topic=q_topic,
+                difficulty=difficulty,
+            )
+            db.add(q)
+        except Exception:
+            break
+
+    if not selected:
+        q = InterviewQuestion(
+            session_id=session.id,
+            question_text=f"Tell me about your experience with {role.replace('_', ' ')}.",
             topic=role,
             difficulty=difficulty,
         )
@@ -73,6 +104,7 @@ def submit_answer(
         difficulty=session.difficulty,
         question=question.question_text,
         answer=answer_text,
+        strictness=session.strictness or "moderate",
     )
 
     evaluation = Evaluation(

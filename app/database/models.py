@@ -30,6 +30,7 @@ class InterviewSession(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     role = Column(String(100), nullable=False)
     difficulty = Column(String(50), nullable=False)
+    strictness = Column(String(20), default="moderate")
     status = Column(String(20), default=SessionStatus.IN_PROGRESS.value)
     overall_score = Column(Float, nullable=True)
     started_at = Column(DateTime, default=datetime.datetime.utcnow)

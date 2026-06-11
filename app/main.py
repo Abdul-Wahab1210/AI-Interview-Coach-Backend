@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.db import engine, Base
-from app.auth.routes import router as auth_router
+from app.auth.routes import public_router as auth_public_router, protected_router as auth_protected_router
 from app.interviews.routes import router as interview_router
 from app.reports.routes import router as report_router
 from app.speech.routes import router as speech_router
@@ -25,7 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+app.include_router(auth_public_router)
+app.include_router(auth_protected_router)
 app.include_router(interview_router)
 app.include_router(report_router)
 app.include_router(speech_router)

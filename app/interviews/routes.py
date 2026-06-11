@@ -7,12 +7,12 @@ from app.database.schemas import InterviewStartRequest, AnswerSubmit, InterviewS
 from app.auth.utils import get_current_user
 from app.interviews.service import start_session, submit_answer, finish_session
 
-router = APIRouter(prefix="/interviews", tags=["interviews"])
+router = APIRouter(prefix="/interviews", tags=["interviews"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/start", response_model=dict)
 def start(payload: InterviewStartRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    session = start_session(db, user.id, payload.role, payload.difficulty, payload.num_questions)
+    session = start_session(db, user.id, payload.role, payload.difficulty, payload.strictness, payload.num_questions)
     questions = db.query(InterviewQuestion).filter(InterviewQuestion.session_id == session.id).order_by(InterviewQuestion.id).all()
     return {
         "session_id": session.id,

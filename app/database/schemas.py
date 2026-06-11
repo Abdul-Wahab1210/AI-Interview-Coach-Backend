@@ -31,6 +31,7 @@ class Token(BaseModel):
 class InterviewStartRequest(BaseModel):
     role: str
     difficulty: str
+    strictness: str = "moderate"
     num_questions: int = 5
 
 
@@ -55,6 +56,7 @@ class InterviewSessionResponse(BaseModel):
     id: int
     role: str
     difficulty: str
+    strictness: str
     status: str
     overall_score: Optional[float]
     started_at: datetime
